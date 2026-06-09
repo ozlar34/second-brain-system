@@ -161,6 +161,21 @@ the PARA mapping, and the capture-to-triage flow — is written up in
 [CONVENTIONS.md](CONVENTIONS.md). It is deliberately generic so a reader could
 adopt the same structure.
 
+## Prior art
+
+The "second brain" framing and the PARA structure both come from Tiago Forte's
+[*Building a Second Brain*](https://www.buildingasecondbrain.com/) (2022), which
+is where this started. PARA — Projects, Areas, Resources, Archives — is his
+method for organizing knowledge by how actionable it is; this system adopts it
+wholesale for how notes *rest* (see [CONVENTIONS.md](CONVENTIONS.md)).
+
+What's layered on top is the part that isn't in the book: the activation engine.
+Forte's method is about how a knowledge base is *organized*; this repo is about
+how one is *run* — the capture pipeline, the Claude Code plus local-LLM
+automation that reads and writes the vault, and the deterministic drift
+tripwires that keep it from rotting. The methodology is borrowed; the system
+built around it is the original work.
+
 ## Examples
 
 [`examples/`](examples/) holds four **fully synthetic** notes that show the

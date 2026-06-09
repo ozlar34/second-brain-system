@@ -1,3 +1,5 @@
+![second-brain-system — a self-documenting knowledge + automation system](docs/banner.png)
+
 # second-brain-system
 
 A designed, self-documenting personal knowledge and automation system. Obsidian

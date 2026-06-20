@@ -23,7 +23,8 @@ The work to publish a public demo:
   set of source modules (`lib/sources/*.ts`). Replace those with fixtures so the
   app renders entirely from invented data.
 - **Scrub absolute paths.** Remove home-directory and cloud-storage paths baked
-  into config; drive everything off env vars with safe demo defaults.
+  into config; drive everything off env vars with safe demo defaults
+  (this concerns the private companion dashboard app, not this repository).
 - **Add a "run with demo data" mode.** A single flag that loads fixtures instead
   of the live sources, so the demo is the default and the live wiring is opt-in.
 - **Deploy a static preview.** Build and host a read-only preview that anyone can

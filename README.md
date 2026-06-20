@@ -140,7 +140,7 @@ for the things PARA does not cover: live state, tooling, templates, and capture
 staging. Every note is typed by a closed `note_type` enum. Details in
 [CONVENTIONS.md](CONVENTIONS.md).
 
-**Claude Code + GSD.** Claude Code is the activation engine. A library of skills
+**Claude Code + GSD (Get Stuff Done).** Claude Code is the activation engine. A library of skills
 (slash-command workflows) handles recurring work — daily briefs, triage,
 logging — reading and writing the vault through the shared path config. Anything
 non-trivial routes into a small project-execution framework (GSD) that keeps a

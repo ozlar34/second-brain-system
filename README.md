@@ -159,7 +159,8 @@ cloud model.
 The transferable design contract — the `note_type` enum, the frontmatter shape,
 the PARA mapping, and the capture-to-triage flow — is written up in
 [CONVENTIONS.md](CONVENTIONS.md). It is deliberately generic so a reader could
-adopt the same structure.
+adopt the same structure. The drift tripwires mean the system stays honest for
+whoever is running it, not just the original author.
 
 ## Prior art
 

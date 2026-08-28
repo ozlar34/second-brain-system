@@ -1,9 +1,11 @@
 ---
+note_type: area
 created: 2026-01-04
 updated: 2026-01-15
-note_type: area
 tags:
   - coffee
+cap_lines: 400
+cap_strategy: manual-review
 ---
 # Coffee
 

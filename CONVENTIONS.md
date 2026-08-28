@@ -26,8 +26,14 @@ templates render it, how skills route it, and which hygiene rules apply.
 | `area` | A life-area hub that indexes a domain and links its resources | Areas |
 | `project` | An active, multi-step initiative with a status and next actions | Projects |
 | `state` | Live system state: current focus, active projects, decisions log | meta-folder |
-| `brief` | A generated daily activation brief | meta-folder |
-| `synthesis` | A generated weekly or monthly rollup | meta-folder |
+| `brief` | A generated activation brief (surface retired; type kept for the archive) | meta-folder |
+| `synthesis` | A generated weekly or monthly rollup | Reviews |
+| `person` | A person note: who they are, how you know them, last contact | People |
+| `meeting` | A structured meeting note; raw transcripts stay `source` | Meetings |
+| `summary` | An AI-generated summary of an external source | Resources/Summaries |
+| `skill` | A note documenting one agent skill or slash command | meta-folder |
+| `capture-queue` | A dated learning queue, filled by the session-end distiller and drained weekly | meta-folder |
+| `application` | A job-application index note | Areas |
 
 The enum is **closed on purpose**. Adding a value is a schema change: you update
 the canonical schema doc and teach the hygiene scanner the new value in the same
@@ -53,13 +59,26 @@ Captured notes (anything that enters through Layer 1) add a `captured_from`
 discriminator so you always know how a thing arrived:
 
 ```yaml
-captured_from: web-clipper   # web-clipper | telegram | raindrop | manual
+captured_from: web-clipper   # web-clipper | telegram | raindrop | manual | r1-voice
 processed: false             # flips to true once triaged
 ```
 
 `captured_from` is a closed enum, same discipline as `note_type`. It is the
 difference between "I wrote this" and "this arrived from somewhere," which
-matters when you are deciding what to trust and what to triage.
+matters when you are deciding what to trust and what to triage. `r1-voice` is
+the push-to-talk voice-device lane: speech is transcribed locally and lands as
+a `source` note like any other capture.
+
+Long-lived hub notes carry a growth cap that the hygiene scanner enforces:
+
+```yaml
+cap_lines: 400            # scanner flags the note over this; warns at 80%
+cap_strategy: rotate-dated   # rotate-dated | evict-oldest | manual-review
+```
+
+`rotate-dated` moves overflow into a dated archive file, `evict-oldest` drops
+the oldest entries of a log-shaped note, `manual-review` only flags. Rotation is
+human-triggered, never on cron.
 
 **Render rule:** no blank line between the closing `---` and the first heading.
 A gap there renders as dead space in the properties panel.
@@ -74,15 +93,18 @@ A gap there renders as dead space in the properties panel.
 | Archives | `Archive/` | Retired projects, sources, and system notes |
 
 PARA is a knowledge taxonomy. It has no slot for live state, tooling, or capture
-staging, so the vault adds four `_`-prefixed meta-folders that PARA does not
-define:
+staging, so the vault adds a handful of meta-folders that PARA does not define
+(the `_`-prefixed ones are the system's own machinery):
 
 | Meta-folder | Holds |
 |---|---|
-| `_Dashboard/` | Live state: current context, daily briefs, syntheses, decisions log, hygiene reports |
+| `_Dashboard/` | Live state: decisions log, hygiene reports, proposal files |
 | `_System/` | Tooling and schema: tool notes, tag taxonomy, frontmatter schema, the architecture map |
 | `_Templates/` | Note templates, one per `note_type` |
+| `_Capture/` | Learning queues (`capture-queue`) drained by the weekly review |
 | `Inbox/` | Capture staging (Layer 1) |
+| `Reviews/` | Weekly reviews, monthly reviews, and the cron-drafted weekly syntheses |
+| `Goals/` | One canonical goals note per year, updated by the weekly review |
 
 The `_` prefix is **reserved for top-level system folders** and never appears
 inside a content folder. That single rule keeps "the system's own machinery"
@@ -104,10 +126,14 @@ A triage pass walks the inbox and gives each item:
    | `ignore` | Drop it; it was noise |
    | `hold` | Keep it staged with a reason; revisit next pass |
 
-Triage runs in **bounded batches**. A pass stops after a small number of
-actionable verdicts and hands off to a fresh session rather than grinding a
-500-item inbox in one sitting. Bounded batches keep each pass cheap and keep
-attention from collapsing halfway through a long queue.
+Triage runs in three modes. An unattended **propose** pass fans out a read-only
+check per item, stages the verdicts to a pending file, and pushes an action list
+to Telegram — it writes nothing to the vault. A **review** pass applies the
+staged proposals (promote, flip `processed`, then clean up — in that order). The
+**interactive** walkthrough is bounded: it stops after a small number of
+actionable verdicts and hands off rather than grinding a 500-item inbox in one
+sitting. The model classifies; a deterministic script applies. `ignore` in the
+unattended path is a reversible quarantine, never a delete.
 
 ## Backlinks and hubs
 
@@ -118,8 +144,8 @@ automation in the convention set, and it is what keeps areas from going stale.
 
 ## Why the enums are closed
 
-Source, resource, area, project, state, brief, synthesis. Web-clipper, telegram,
-raindrop, manual. Act, save, backlog, ignore, hold. Three small closed sets do
+Thirteen `note_type` values. Five `captured_from` sources. Five triage
+verdicts. Three small closed sets do
 most of the structural work in the system. Closed enums are what let a
 deterministic script tell "healthy" from "drifted" without an LLM in the loop —
 the hygiene scanners described in the README lean entirely on this discipline.

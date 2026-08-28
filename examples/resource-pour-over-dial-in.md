@@ -1,10 +1,11 @@
 ---
+note_type: resource
 created: 2026-01-15
 updated: 2026-01-15
-note_type: resource
 tags:
   - coffee
   - brewing
+source: James Hoffmann
 ---
 # Pour-Over Dial-In
 

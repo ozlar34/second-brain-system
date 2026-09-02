@@ -257,12 +257,13 @@ layer boundary, which is the trigger for re-cutting this snapshot.
 | 2026-06-19 | Ollama replaced by llama-swap / llama-server on both machines | Explicit model pools, per-model flags, and swap-on-demand instead of an opaque daemon |
 | 2026-06-21 | The heavier project-execution framework was retired, replaced by a lighter grill → spec → tickets → implement ticket loop | Its per-project scaffold stopped paying for itself against the lighter loop |
 | 2026-06-22 | Hermes Agent became load-bearing as the second runtime | The unattended vault crons moved onto it on the always-on host, establishing the sole-writer rule |
-| 2026-07-05 | The private companion cockpit superseded an earlier plan to build a public demo of it | The cockpit's design — the Actuator posture, the write guardrails — is a stronger portfolio story in prose than a sanitized demo would have been, for a write-capable, deeply personal tool not suited to a public click-through |
+| 2026-07-05 | The private companion cockpit was built as a write-capable tool, superseding an earlier planned read-only dashboard | The real need was one committed next action with guarded writes, not a read-only view to browse |
 | 2026-07-26 | Daily Brief retired | The generated morning digest wasn't being read and cost a full agent call per run; the weekly synthesis is the surviving rollup |
 | 2026-07-27 | Cross-host published state | Lets a job on the server reason about the laptop without reaching it — carried out-of-band from the vault sync whose staleness it detects |
 | 2026-08-23 | Push-to-talk voice capture lane | A dedicated voice device feeds the inbox through the second runtime |
 | 2026-08-25 | Hermes moved from local models to the subscription cloud tier | The local pool had no production consumer the subscription tier didn't serve better; the local stack became the offline/private tier by design, not the cost tier |
 | 2026-08-26 | Scheduled jobs generated from one tracked manifest | Two hosts with different job sets, users, and timezones can't share a checked-in plist; the manifest is now authoritative and the drift check reads it |
+| 2026-09-02 | The planned public demo of the companion cockpit was retired in favor of documenting its design | Sanitizing a write-capable, deeply personal tool would have diluted the guardrail story into a generic-looking dashboard |
 
 ## Conventions
 

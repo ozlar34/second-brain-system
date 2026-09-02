@@ -13,7 +13,7 @@ re-cut from the private architecture note at milestones, using fully synthetic
 examples. There is no real personal content here. The point is the architecture
 and the decisions behind it.
 
-*Last verified: 2026-08-26.*
+*Last verified: 2026-09-02.*
 
 ## The 30-second model
 
@@ -53,7 +53,7 @@ flowchart LR
 
     subgraph L4["4 · Agents"]
         SKILLS[Claude Code<br/>skills + MCP servers]
-        GSD[Project execution<br/>plan · execute · summarize]
+        TIX[Ticket loop<br/>grill → spec → tickets → implement]
         HERMES[Hermes Agent<br/>second runtime · cron + messaging]
     end
 
@@ -69,8 +69,8 @@ flowchart LR
     HERMES -->|weekly synthesis · triage cron| VAULT
     SYNC -.->|carries config + published state<br/>between hosts| SCHED
     VAULT -->|read state| SKILLS
-    SKILLS -->|non-trivial work| GSD
-    GSD -->|results mirrored back| VAULT
+    SKILLS -->|non-trivial work| TIX
+    TIX -->|results mirrored back| VAULT
     LOCAL -.->|transcription · dictation · chat| N8N
     CLOUD -->|reasoning · agent work| SKILLS & HERMES
 ```
@@ -165,6 +165,37 @@ sessions plus a cost statement for T3). No LLM sits in a destructive path:
 placement is deterministic, the writer never deletes or reorders, and
 adjudication is human and batched into the weekly review.
 
+### The companion cockpit, and why it isn't a public demo
+
+There is a private companion app — a small always-on cockpit, not part of this
+repo — that reads the task backlog, the calendar, and the vault, and turns them
+into one committed next action instead of a list to choose from. It exists
+because the real bottleneck usually isn't *organizing* tasks, it's *starting*
+one: ADHD-driven activation stalls, where a full backlog is paralyzing and the
+fix is one obvious next thing, not more options.
+
+A few decisions carry the weight of the design:
+
+- **Actuator, not a store.** The cockpit never owns truth — it reads across the
+  task store, the calendar, and the vault, and every write is delegated back to
+  whichever system owns that data. Its own state is coordination bookkeeping,
+  never the record of record.
+- **Trust Ratchet.** A direct tap has full power, no confirmation. Everything
+  else — an engine-placed calendar block, an AI-mediated bulk instruction —
+  starts confirm-gated, and each write class only graduates to autonomous by
+  explicit, reversible say-so. Destructive operations are structurally absent
+  from the autonomous paths — a design absence, not a setting.
+- **Surface-output guardrail.** Everything shown has to trace to a real
+  anchor — an actual task, an actual scheduled run — never invented or padded.
+  A run the cockpit can't confirm the outcome of is marked honestly `stale`,
+  never guessed as succeeded. One hallucinated pick would poison trust in
+  every pick after it.
+
+This is why an earlier plan for a public demo of this app was dropped instead
+of built: sanitizing a write-capable, deeply personal cockpit for a public
+click-through would have cost weeks and diluted the guardrail story above into
+a generic-looking dashboard. The design travels better as prose than as a demo.
+
 ## The layers
 
 **Capture.** Everything inbound lands in a staging inbox carrying a
@@ -195,15 +226,16 @@ for the things PARA does not cover: live state, tooling, templates, and capture
 staging. Every note is typed by a closed `note_type` enum. Details in
 [CONVENTIONS.md](CONVENTIONS.md).
 
-**Agents — Claude Code + GSD, and Hermes Agent.** Claude Code is the primary
+**Agents — Claude Code and Hermes Agent.** Claude Code is the primary
 activation engine: a library of roughly 80–100 skills (slash-command workflows)
 handles recurring work, and MCP servers connect the external systems — TickTick,
 Notion, Gmail, Calendar, n8n, Gemini, Raindrop. Anything non-trivial routes into
-a small project-execution framework (GSD) that keeps a `.planning/` directory per
-project: a plan, a roadmap, a state file, and per-phase plan/summary documents.
-Plans get executed atomically and summarized; the output is mirrored back into
-the vault. **Hermes Agent** is the second runtime: a self-improving agent with
-its own skills, persistent memory, messaging gateways, and cron triggers. It owns
+a lightweight ticket loop — grill an idea into a spec, break the spec into
+tickets, implement each one under its own scratch directory — which replaced an
+earlier, heavier project-execution framework once that framework's per-project
+scaffold stopped paying for itself. **Hermes Agent** is the second runtime: a
+self-improving agent with its own skills, persistent memory, messaging
+gateways, and cron triggers. It owns
 the unattended work — the weekly synthesis and the triage cron — and the
 push-to-talk voice capture lane. The two compose rather than compete: Claude Code
 is what a person sits in front of; Hermes is what runs while nobody is looking.
@@ -223,12 +255,15 @@ layer boundary, which is the trigger for re-cutting this snapshot.
 |---|---|---|
 | 2026-06-10 | `note_type` enum grew from 7 to 13 values; capture-output folders (People, Meetings, Summaries) added | The vault started holding structured capture output, not just notes |
 | 2026-06-19 | Ollama replaced by llama-swap / llama-server on both machines | Explicit model pools, per-model flags, and swap-on-demand instead of an opaque daemon |
+| 2026-06-21 | The heavier project-execution framework was retired, replaced by a lighter grill → spec → tickets → implement ticket loop | Its per-project scaffold stopped paying for itself against the lighter loop |
 | 2026-06-22 | Hermes Agent became load-bearing as the second runtime | The unattended vault crons moved onto it on the always-on host, establishing the sole-writer rule |
+| 2026-07-05 | The private companion cockpit was built as a write-capable tool, superseding an earlier planned read-only dashboard | The real need was one committed next action with guarded writes, not a read-only view to browse |
 | 2026-07-26 | Daily Brief retired | The generated morning digest wasn't being read and cost a full agent call per run; the weekly synthesis is the surviving rollup |
 | 2026-07-27 | Cross-host published state | Lets a job on the server reason about the laptop without reaching it — carried out-of-band from the vault sync whose staleness it detects |
 | 2026-08-23 | Push-to-talk voice capture lane | A dedicated voice device feeds the inbox through the second runtime |
 | 2026-08-25 | Hermes moved from local models to the subscription cloud tier | The local pool had no production consumer the subscription tier didn't serve better; the local stack became the offline/private tier by design, not the cost tier |
 | 2026-08-26 | Scheduled jobs generated from one tracked manifest | Two hosts with different job sets, users, and timezones can't share a checked-in plist; the manifest is now authoritative and the drift check reads it |
+| 2026-09-02 | The planned public demo of the companion cockpit was retired in favor of documenting its design | Sanitizing a write-capable, deeply personal tool would have diluted the guardrail story into a generic-looking dashboard |
 
 ## Conventions
 
